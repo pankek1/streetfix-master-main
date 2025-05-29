@@ -1,0 +1,108 @@
+<div class="welcome-container">
+    <div class="circles">
+        <div class="circle circle-1"></div>
+        <div class="circle circle-2"></div>
+        <div class="circle circle-3"></div>
+    </div>
+
+    <div class="logo-container">
+        <div class="logo" (click)="showAbout()">
+            <div class="logo-inner">
+                <div class="logo-front">
+                    <img src="assets/streetfix-logo.png" alt="StreetFix Logo">
+                </div>
+                <div class="logo-back">
+                    <img src="assets/streetfix-logo.png" alt="StreetFix Logo">
+                </div>
+            </div>
+            <div class="shine"></div>
+        </div>
+    </div>
+
+    <div class="content">
+        <h1>Welcome to StreetFix</h1>
+        <p>Many community issues go unreported due to lack of an efficient system. StreetFix makes it easy to bring attention to problems that need fixing.</p>
+    </div>
+
+    <div class="user-flow-section" (mouseenter)="userFlowHovered = true" (mouseleave)="userFlowHovered = false" [class.expanded]="userFlowHovered">
+        <h2>How StreetFix Works</h2>
+        <ol *ngIf="userFlowHovered">
+            <li><b>Create a Report:</b> Fill out a simple form with a description, photo, and location of the issue you want to report.</li>
+            <li><b>Submit Your Report:</b> Once submitted, your report is added to the community dashboard for visibility and tracking.</li>
+            <li><b>Admin Review:</b> Our admin team reviews each report, verifies the details, and updates the status as the issue is addressed.</li>
+            <li><b>Track Progress:</b> You and the community can track the status of all reports in real time, from submission to resolution.</li>
+        </ol>
+    </div>
+
+    <div class="feature-icons">
+        <div class="icon-feature-group">
+            <div class="icon-box">
+                <img src="assets/1.png" alt="Report Dashboard">
+                <div class="tooltip">
+                    <h3>Report Dashboard</h3>
+                    <p>Stay informed every step of the way. The dashboard displays all submitted reports along with their current status in real time, so both users and administrators can track updates and progress with ease.</p>
+                </div>
+            </div>
+            <div class="icon-title">Report Dashboard</div>
+        </div>
+        <div class="icon-feature-group">
+            <div class="icon-box">
+                <img src="assets/2.png" alt="Upload Picture">
+                <div class="tooltip">
+                    <h3>Upload Picture</h3>
+                    <p>Make your reports more impactful. Users can upload clear, relevant images to support their submissions, helping authorities better understand the issue and take appropriate action faster.</p>
+                </div>
+            </div>
+            <div class="icon-title">Upload Picture</div>
+        </div>
+        <div class="icon-feature-group">
+            <div class="icon-box">
+                <img src="assets/3.png" alt="GPS Tracking">
+                <div class="tooltip">
+                    <h3>GPS Tracking</h3>
+                    <p>No need to manually enter the location. StreetFix automatically pinpoints the exact spot of the reported issue, making it easier to identify and respond to problems quickly and accurately.</p>
+                </div>
+            </div>
+            <div class="icon-title">GPS Tracking</div>
+        </div>
+        <div class="icon-feature-group">
+            <div class="icon-box">
+                <img src="assets/4.png" alt="Community Upvoting">
+                <div class="tooltip">
+                    <h3>Community Upvoting</h3>
+                    <p>Let your voice be heard. Users can upvote reports they find important, helping bring the most urgent issues to the top of the list so local authorities know what to prioritize first.</p>
+                </div>
+            </div>
+            <div class="icon-title">Community Upvoting</div>
+        </div>
+    </div>
+
+    <div class="cta-section">
+        <p><b>Ready to take action?</b></p>
+        
+        <div class="terms-checkbox">
+            <label for="terms-check">
+                <input type="checkbox" id="terms-check" [(ngModel)]="termsAccepted">
+                <span class="checkmark"></span>
+                I have read and agree to the <a href="javascript:void(0)" (click)="showTerms()">Terms and Conditions</a>
+            </label>
+        </div>
+        
+        <button class="get-started-btn" (click)="handleGetStarted()">Get Started Now</button>
+    </div>
+
+    <!-- Error Popup -->
+    <div class="error-popup" *ngIf="showError" (click)="closeError()">
+        <div class="error-content" (click)="$event.stopPropagation()">
+            <div class="error-logo-container">
+                <img src="assets/streetfix-logo.png" alt="StreetFix Logo">
+            </div>
+            <p>To continue, please confirm your acceptance of the Terms and Conditions.</p>
+            <button class="error-close-btn" (click)="closeError()">OK</button>
+        </div>
+    </div>
+
+    <app-terms-and-conditions [isVisible]="termsVisible" (closed)="termsVisible = false"></app-terms-and-conditions>
+    <app-about [isVisible]="aboutVisible" (closed)="aboutVisible = false"></app-about>
+</div>
+  

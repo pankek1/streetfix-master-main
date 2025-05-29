@@ -1,0 +1,309 @@
+<!-- Primary Header with Logo -->
+<div class="primary-header">
+  <div class="logo-container">
+    <div class="logo-oval">
+      <img src="assets/streetfix-logo.png" alt="StreetFix Logo" class="logo">
+    </div>
+  </div>
+</div>
+
+<!-- Secondary Header with Navigation and Title -->
+<div class="secondary-header">
+  <div class="nav-container">
+    <div class="nav-oval">
+      <a routerLink="/reports" class="nav-link">Reports</a>
+      <a routerLink="/admin-dashboard" class="nav-link active">Admin</a>
+      <!-- Add Profile link conditional for non-admins if needed later -->
+      <!-- <a *ngIf="!isAdmin" routerLink="/profile" class="nav-link">Profile</a> -->
+    </div>
+    <button class="nav-arrow logout-button" (click)="handleLogout()">
+      <img src="assets/logout.png" alt="Logout" class="logout-icon">
+    </button>
+  </div>
+  <h1 class="reports-title">ADMIN</h1>
+</div>
+
+<!-- Logout Confirmation Dialog -->
+<app-logout-confirmation
+  *ngIf="showLogoutDialog"
+  (confirm)="onLogoutConfirmed()"
+  (cancel)="onLogoutCancelled()">
+</app-logout-confirmation>
+
+<!-- Loading State -->
+<div class="loading-container" *ngIf="isLoading">
+  <div class="loading-spinner"></div>
+  <p>Loading dashboard...</p>
+</div>
+
+<!-- Main Content -->
+<div class="content-wrapper" *ngIf="!isLoading">
+  <!-- Category Filter Buttons -->
+  <div class="category-filters">
+    <button 
+      class="filter-button pending" 
+      [class.active]="selectedCategory === 'pending'"
+      (click)="filterReports('pending')">
+      Pending Reports
+    </button>
+    <button 
+      class="filter-button in-progress" 
+      [class.active]="selectedCategory === 'in_progress'"
+      (click)="filterReports('in_progress')">
+      In Progress
+    </button>
+    <button 
+      class="filter-button resolved" 
+      [class.active]="selectedCategory === 'resolved'"
+      (click)="filterReports('resolved')">
+      Resolved
+    </button>
+  </div>
+
+  <!-- Reports Overview -->
+  <div class="reports-overview">
+    <div class="overview-card pending">
+      <h3>Pending Reports</h3>
+      <div class="count">{{ pendingReports.length }}</div>
+    </div>
+    <div class="overview-card in-progress">
+      <h3>In Progress</h3>
+      <div class="count">{{ inProgressReports.length }}</div>
+    </div>
+    <div class="overview-card resolved">
+      <h3>Resolved</h3>
+      <div class="count">{{ resolvedReports.length }}</div>
+    </div>
+  </div>
+
+  <!-- Mobile Status Groups (hidden on desktop) -->
+  <div class="mobile-status-groups">
+    <div class="status-group pending">
+      <button 
+        class="filter-button pending" 
+        [class.active]="selectedCategory === 'pending'"
+        (click)="filterReports('pending')">
+        Pending Reports
+      </button>
+      <div class="overview-card pending">
+        <h3>Pending Reports</h3>
+        <div class="count">{{ pendingReports.length }}</div>
+      </div>
+    </div>
+
+    <div class="status-group in-progress">
+      <button 
+        class="filter-button in-progress" 
+        [class.active]="selectedCategory === 'in_progress'"
+        (click)="filterReports('in_progress')">
+        In Progress
+      </button>
+      <div class="overview-card in-progress">
+        <h3>In Progress</h3>
+        <div class="count">{{ inProgressReports.length }}</div>
+      </div>
+    </div>
+
+    <div class="status-group resolved">
+      <button 
+        class="filter-button resolved" 
+        [class.active]="selectedCategory === 'resolved'"
+        (click)="filterReports('resolved')">
+        Resolved
+      </button>
+      <div class="overview-card resolved">
+        <h3>Resolved</h3>
+        <div class="count">{{ resolvedReports.length }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reports by Status -->
+  <div class="reports-sections" *ngIf="selectedCategory">
+    <!-- Pending Reports -->
+    <div class="report-section" *ngIf="selectedCategory === 'pending'">
+      <h2>Pending Reports</h2>
+      <div class="reports-list">
+        <div class="report-card" *ngFor="let report of pendingReports">
+          <!-- Header: Username left, status pill right -->
+          <div class="report-header-row">
+            <div class="user-info">
+              <i class="fas fa-user-circle"></i>
+              <span>{{ report.userEmail ? report.userEmail.split('@')[0] : 'Anonymous' }}</span>
+            </div>
+            <div class="status-pill" [ngClass]="report.status">
+              {{ report.status | titlecase }}
+            </div>
+          </div>
+          <div class="report-image" *ngIf="report.imageUrl || (report.images && report.images.length > 0)">
+            <img [src]="report.imageUrl || report.images[0]"
+                 alt="Report Image"
+                 (error)="handleImageError($event)"  
+                 (load)="handleImageLoad(report.imageUrl || report.images[0])">
+          </div>
+          <div class="report-details-box">
+            <!-- Only show category, location, description, and coordinates -->
+            <div class="details-category">
+              <i class="fas fa-tag category-icon" style="color:#3D8D7A;"></i>
+              <span class="category-text">{{ report.category }}</span>
+            </div>
+            <div class="details-location" *ngIf="report.address || report.location">
+              <i class="fas fa-map-marker-alt location-icon" style="color:#3D8D7A;"></i>
+              <span class="location-text">{{ report.address || report.location }}</span>
+            </div>
+            <div class="details-description" *ngIf="report.description">
+              <i class="fas fa-align-left description-icon" style="color:#3D8D7A;"></i>
+              <span class="description-text">{{ report.description }}</span>
+            </div>
+            <div class="details-coordinates" *ngIf="report.latitude && report.longitude">
+              <i class="fas fa-location-arrow coordinates-icon" style="color:#3D8D7A;"></i>
+              <span class="coordinates-text">Lat: {{ report.latitude | number:'1.6-6' }}, Lng: {{ report.longitude | number:'1.6-6' }}</span>
+            </div>
+          </div>
+          <div class="report-footer-row">
+             <!-- Status Controls (Admin Only) -->
+            <div class="status-controls">
+              <button 
+                *ngFor="let status of ['in_progress', 'resolved']"
+                class="status-button"
+                [class.active]="report.status === status"
+                [ngClass]="status"
+                (click)="updateStatus(report, $any(status))">
+                {{ status | titlecase }}
+              </button>
+            </div>
+            
+            <div class="timestamp">
+              <span class="timestamp-full">{{ report.timestamp?.toDate() | date:'medium' }}</span>
+              <span class="timestamp-compact">{{ report.timestamp?.toDate() | date:'MMM d, h:mm a' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- In Progress Reports -->
+    <div class="report-section" *ngIf="selectedCategory === 'in_progress'">
+      <h2>In Progress Reports</h2>
+      <div class="reports-list">
+        <div class="report-card" *ngFor="let report of inProgressReports">
+           <!-- Header: Username left, status pill right -->
+          <div class="report-header-row">
+            <div class="user-info">
+              <i class="fas fa-user-circle"></i>
+              <span>{{ report.userEmail ? report.userEmail.split('@')[0] : 'Anonymous' }}</span>
+            </div>
+            <div class="status-pill" [ngClass]="report.status">
+              {{ report.status | titlecase }}
+            </div>
+          </div>
+          <div class="report-image" *ngIf="report.imageUrl || (report.images && report.images.length > 0)">
+            <img [src]="report.imageUrl || report.images[0]"
+                 alt="Report Image"
+                 (error)="handleImageError($event)"  
+                 (load)="handleImageLoad(report.imageUrl || report.images[0])">
+          </div>
+          <div class="report-details-box">
+            <!-- Only show category, location, description, and coordinates -->
+            <div class="details-category">
+              <i class="fas fa-tag category-icon" style="color:#3D8D7A;"></i>
+              <span class="category-text">{{ report.category }}</span>
+            </div>
+            <div class="details-location" *ngIf="report.address || report.location">
+              <i class="fas fa-map-marker-alt location-icon" style="color:#3D8D7A;"></i>
+              <span class="location-text">{{ report.address || report.location }}</span>
+            </div>
+            <div class="details-description" *ngIf="report.description">
+              <i class="fas fa-align-left description-icon" style="color:#3D8D7A;"></i>
+              <span class="description-text">{{ report.description }}</span>
+            </div>
+            <div class="details-coordinates" *ngIf="report.latitude && report.longitude">
+              <i class="fas fa-location-arrow coordinates-icon" style="color:#3D8D7A;"></i>
+              <span class="coordinates-text">Lat: {{ report.latitude | number:'1.6-6' }}, Lng: {{ report.longitude | number:'1.6-6' }}</span>
+            </div>
+          </div>
+          <div class="report-footer-row">
+             <!-- Status Controls (Admin Only) -->
+            <div class="status-controls">
+              <button 
+                *ngFor="let status of ['pending', 'resolved']"
+                class="status-button"
+                [class.active]="report.status === status"
+                [ngClass]="status"
+                (click)="updateStatus(report, $any(status))">
+                {{ status | titlecase }}
+              </button>
+            </div>
+            
+            <div class="timestamp">
+              <span class="timestamp-full">{{ report.timestamp?.toDate() | date:'medium' }}</span>
+              <span class="timestamp-compact">{{ report.timestamp?.toDate() | date:'MMM d, h:mm a' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Resolved Reports -->
+    <div class="report-section" *ngIf="selectedCategory === 'resolved'">
+      <h2>Resolved Reports</h2>
+      <div class="reports-list">
+        <div class="report-card" *ngFor="let report of resolvedReports">
+           <!-- Header: Username left, status pill right -->
+          <div class="report-header-row">
+            <div class="user-info">
+              <i class="fas fa-user-circle"></i>
+              <span>{{ report.userEmail ? report.userEmail.split('@')[0] : 'Anonymous' }}</span>
+            </div>
+            <div class="status-pill" [ngClass]="report.status">
+              {{ report.status | titlecase }}
+            </div>
+          </div>
+          <div class="report-image" *ngIf="report.imageUrl || (report.images && report.images.length > 0)">
+            <img [src]="report.imageUrl || report.images[0]"
+                 alt="Report Image"
+                 (error)="handleImageError($event)"  
+                 (load)="handleImageLoad(report.imageUrl || report.images[0])">
+          </div>
+          <div class="report-details-box">
+            <!-- Only show category, location, description, and coordinates -->
+            <div class="details-category">
+              <i class="fas fa-tag category-icon" style="color:#3D8D7A;"></i>
+              <span class="category-text">{{ report.category }}</span>
+            </div>
+            <div class="details-location" *ngIf="report.address || report.location">
+              <i class="fas fa-map-marker-alt location-icon" style="color:#3D8D7A;"></i>
+              <span class="location-text">{{ report.address || report.location }}</span>
+            </div>
+            <div class="details-description" *ngIf="report.description">
+              <i class="fas fa-align-left description-icon" style="color:#3D8D7A;"></i>
+              <span class="description-text">{{ report.description }}</span>
+            </div>
+            <div class="details-coordinates" *ngIf="report.latitude && report.longitude">
+              <i class="fas fa-location-arrow coordinates-icon" style="color:#3D8D7A;"></i>
+              <span class="coordinates-text">Lat: {{ report.latitude | number:'1.6-6' }}, Lng: {{ report.longitude | number:'1.6-6' }}</span>
+            </div>
+          </div>
+          <div class="report-footer-row">
+            <!-- Status Controls (Admin Only) -->
+            <div class="status-controls">
+              <button 
+                *ngFor="let status of ['pending', 'in_progress']"
+                class="status-button"
+                [class.active]="report.status === status"
+                [ngClass]="status"
+                (click)="updateStatus(report, $any(status))">
+                {{ status | titlecase }}
+              </button>
+            </div>
+            <div class="timestamp">
+              <span class="timestamp-full">{{ report.timestamp?.toDate() | date:'medium' }}</span>
+              <span class="timestamp-compact">{{ report.timestamp?.toDate() | date:'MMM d, h:mm a' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+  

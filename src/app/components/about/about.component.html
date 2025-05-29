@@ -1,0 +1,26 @@
+<div class="modal-overlay" *ngIf="isVisible" (click)="closeModal($event)">
+    <div class="modal-content">
+        <div class="logo-container">
+            <img src="assets/streetfix-logo.png" alt="StreetFix Logo">
+            <button class="close-btn" (click)="close()">&times;</button>
+        </div>
+        
+        <div class="content-container">
+            <h2>Welcome to StreetFix</h2>
+            
+            <div class="about-section">
+                <p>We’re so glad you’re here. At StreetFix, we believe that every voice matters and that real change begins with people who care about their community. That’s why we created this platform — to give you the power to speak up, take action, and make a difference right where you live.</p>
+                
+                <p>StreetFix is more than just a reporting tool. It’s a community-driven platform that helps you share the things you see every day that need attention, whether it's a pothole that needs patching, a broken streetlight, a clogged drainage, or a damaged sidewalk. With just a few taps, your reports go directly to the local authorities who can take action.</p>
+                
+                <p>We make it easy for you to be part of the solution. You don’t need to make calls or fill out long forms. Just open the app, snap a photo, add a short description, and send it in. From there, StreetFix keeps track of the status of your report so you can see what’s happening every step of the way.</p>
+
+                <p>By connecting everyday citizens with the teams responsible for maintaining our public spaces, StreetFix helps create a culture of transparency, accountability, and collaboration. It’s about turning frustration into action, and small observations into real improvements.</p>
+
+                <p>Because when communities and local governments work together, amazing things can happen. Safer roads. Cleaner sidewalks. Brighter neighborhoods. And a stronger sense of pride in the places we call home.</p>
+
+                <p>So thank you for being here. Thank you for caring. And thank you for using StreetFix to help make your community better, one report at a time. Let’s fix it together.</p>
+            </div>
+        </div>
+    </div>
+</div>

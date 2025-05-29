@@ -1,0 +1,141 @@
+<!-- Primary Header with Logo -->
+<div class="primary-header">
+  <div class="logo-container">
+    <div class="logo-oval">
+      <img src="assets/streetfix-logo.png" alt="StreetFix Logo" class="logo">
+    </div>
+  </div>
+</div>
+
+<!-- Secondary Header with Navigation and Title -->
+<div class="secondary-header">
+  <div class="nav-container">
+    <div class="nav-oval">
+      <a routerLink="/reports" class="nav-link active">Reports</a>
+      <a *ngIf="isAdmin" routerLink="/admin-dashboard" class="nav-link">Admin</a>
+      <a *ngIf="!isAdmin" routerLink="/profile" class="nav-link">Profile</a>
+    </div>
+    <button class="nav-arrow logout-button" (click)="handleLogout()">
+      <img src="assets/logout.png" alt="Logout" class="logout-icon">
+    </button>
+  </div>
+  <h1 class="reports-title">REPORTS</h1>
+  <!-- Admin Setup Button -->
+  <button *ngIf="showAdminSetup" class="admin-setup-button" (click)="setupInitialAdmin()">
+    <i class="fas fa-user-shield"></i>
+    Setup Admin
+  </button>
+</div>
+
+<!-- Logout Confirmation Dialog -->
+<app-logout-confirmation
+  *ngIf="showLogoutDialog"
+  (confirm)="onLogoutConfirmed()"
+  (cancel)="onLogoutCancelled()">
+</app-logout-confirmation>
+
+<!-- Status Change Confirmation Dialog -->
+<app-status-confirmation-dialog
+  *ngIf="showStatusConfirmationDialog"
+  [newStatus]="newStatusToConfirm || 'pending'"
+  (confirm)="onStatusChangeConfirmed()"
+  (cancel)="onStatusChangeCancelled()">
+</app-status-confirmation-dialog>
+
+<!-- Sort Button -->
+<div class="sort-button-container">
+  <button class="sort-dropdown" (click)="toggleSortMenu()">
+    <i class="fas fa-filter"></i>
+    <span>SORT BY:</span>
+    <i class="fas fa-chevron-down"></i>
+  </button>
+  <div class="sort-menu" [class.active]="isSortMenuOpen">
+    <a href="#" class="sort-option" [class.selected]="currentSort === 'votes-high'" (click)="sortReports('votes-high', $event)">
+      Votes • High to Low
+    </a>
+    <a href="#" class="sort-option" [class.selected]="currentSort === 'votes-low'" (click)="sortReports('votes-low', $event)">
+      Votes • Low to High
+    </a>
+    <a href="#" class="sort-option" [class.selected]="currentSort === 'latest'" (click)="sortReports('latest', $event)">
+      Date • Latest
+    </a>
+    <a href="#" class="sort-option" [class.selected]="currentSort === 'oldest'" (click)="sortReports('oldest', $event)">
+      Date • Oldest
+    </a>
+  </div>
+</div>
+
+<!-- Description Text -->
+<div class="description-text">
+  This is your central hub for managing community reports efficiently. Stay informed, take action, and help keep public spaces well-maintained.
+</div>
+
+<!-- Main Content -->
+<div class="content-wrapper">
+  <!-- Reports Feed -->
+  <div class="reports-feed">
+    <div class="report-card" *ngFor="let report of reports">
+      <!-- Header: Username left, status pill right -->
+      <div class="report-header-row">
+        <div class="user-info">
+          <i class="fas fa-user-circle"></i>
+          <span>{{ report.userEmail ? report.userEmail.split('@')[0] : 'Anonymous' }}</span>
+        </div>
+        <div class="status-pill" [ngClass]="report.status">
+          {{ report.status | titlecase }}
+        </div>
+      </div>
+      <div class="report-image" *ngIf="report.imageUrl || (report.images && report.images.length > 0)">
+        <img [src]="report.imageUrl || report.images[0]"
+             alt="Report Image"
+             (error)="handleImageError($event)"
+             (load)="handleImageLoad(report.imageUrl || report.images[0])">
+      </div>
+      <div class="report-details-box">
+        <!-- Only show category, location, description, and coordinates -->
+        <div class="details-category">
+          <i class="fas fa-tag category-icon" style="color:#3D8D7A;"></i>
+          <span class="category-text">{{ report.category }}</span>
+        </div>
+        <div class="details-location" *ngIf="report.address || report.location">
+          <i class="fas fa-map-marker-alt location-icon" style="color:#3D8D7A;"></i>
+          <span class="location-text">{{ report.address || report.location }}</span>
+        </div>
+        <div class="details-description" *ngIf="report.description && report.description !== 'pending' && report.description !== 'resolved' && report.description !== 'in_progress'">
+          <i class="fas fa-align-left description-icon" style="color:#3D8D7A;"></i>
+          <span class="description-text">{{ report.description }}</span>
+        </div>
+        <div class="details-coordinates" *ngIf="report.latitude && report.longitude">
+          <i class="fas fa-location-arrow coordinates-icon" style="color:#3D8D7A;"></i>
+          <span class="coordinates-text">Lat: {{ report.latitude | number:'1.6-6' }}, Lng: {{ report.longitude | number:'1.6-6' }}</span>
+        </div>
+      </div>
+      <div class="report-footer-row">
+        <button class="upvote-button" (click)="upvoteReport(report)" [disabled]="isSubmitting">
+          <img [src]="getUpvoteIcon(report)" alt="Upvote Icon" class="upvote-arrow">
+          <span>{{ report.upvotes || 0 }}</span>
+        </button>
+
+        <!-- Status Controls (Admin Only) -->
+        <div *ngIf="isAdmin" class="status-controls">
+          <button 
+            *ngFor="let status of statusOptions"
+            class="status-button"
+            [class.active]="report.status === status"
+            (click)="handleStatusChange(report, status)">
+            {{ status | titlecase }}
+          </button>
+        </div>
+        
+        <div class="timestamp">
+          <span class="timestamp-full">{{ report.timestamp?.toDate() | date:'medium' }}</span>
+          <span class="timestamp-compact">{{ report.timestamp?.toDate() | date:'MMM d, h:mm a' }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Reports Feed Footer -->
+  <div class="reports-feed-footer">
+    You've reached the bottom — but hey, at least it's not a pothole!
+  </div>
+</div>
